@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Clock, Users, CheckCircle2, ArrowRight, FileText, Plus, History, AlertCircle, ArrowLeft } from "lucide-react"
+import { Users, CheckCircle2, ArrowRight, FileText, Plus, History, AlertCircle, ArrowLeft } from "lucide-react"
 import { TemaDecisiones } from "@/components/tema-decisiones"
 import { TemaAcciones } from "@/components/tema-acciones"
 import Link from "next/link"
@@ -72,41 +72,77 @@ export function ReunionActiva() {
   const [showFinalizarDialog, setShowFinalizarDialog] = useState(false)
   const [showNuevoTemaDialog, setShowNuevoTemaDialog] = useState(false)
   const [showHistoricoDialog, setShowHistoricoDialog] = useState(false)
+  const [temas, setTemas] = useState(temasReunion)
+  const [nuevoTema, setNuevoTema] = useState({
+    nombre: "",
+    descripcion: "",
+    importancia: "media",
+    responsable: "jd",
+  })
 
-  const tema = temasReunion[temaActual]
-  const progreso = ((temaActual + 1) / temasReunion.length) * 100
+  const tema = temas[temaActual]
+  const progreso = ((temaActual + 1) / temas.length) * 100
+
+  const handleAddTema = () => {
+    const newTema = {
+      id: Date.now().toString(),
+      nombre: nuevoTema.nombre,
+      importancia: nuevoTema.importancia,
+      estado: "en-espera",
+      responsables: [nuevoTema.responsable.toUpperCase()],
+      decisiones: [],
+      acciones: [],
+    }
+
+    setTemas([...temas, newTema])
+    setNuevoTema({ nombre: "", descripcion: "", importancia: "media", responsable: "jd" })
+    setShowNuevoTemaDialog(false)
+  }
 
   return (
     <div className="space-y-6">
-      {/* Header de la reunión */}
-      <Card className="border-2 border-primary">
+      <Card className="border-2 border-blue-200 shadow-md bg-gradient-to-br from-blue-50 to-white">
         <CardHeader>
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div className="flex-1 min-w-[200px]">
               <div className="flex items-center gap-2 mb-2">
                 <div className="h-2 w-2 bg-red-500 rounded-full animate-pulse" />
-                <Badge variant="destructive">Reunión en curso</Badge>
+                <Badge variant="destructive" className="bg-red-600">
+                  Reunión en curso
+                </Badge>
               </div>
-              <CardTitle className="text-2xl">Reunión Semanal - {new Date().toLocaleDateString("es-ES")}</CardTitle>
+              <CardTitle className="text-2xl text-slate-900">
+                Reunión Semanal - {new Date().toLocaleDateString("es-ES")}
+              </CardTitle>
             </div>
 
             <div className="flex items-center gap-3 flex-wrap">
-              <div className="flex items-center gap-2 text-sm">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <span className="font-mono">45 min</span>
-              </div>
-
-              <Button variant="outline" size="sm" onClick={() => setShowHistoricoDialog(true)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowHistoricoDialog(true)}
+                className="border-slate-200"
+              >
                 <History className="h-4 w-4 mr-2" />
                 Ver Histórico
               </Button>
 
-              <Button variant="outline" size="sm" onClick={() => setShowNuevoTemaDialog(true)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowNuevoTemaDialog(true)}
+                className="border-slate-200"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Añadir Tema
               </Button>
 
-              <Button variant="default" size="sm" onClick={() => setShowFinalizarDialog(true)}>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => setShowFinalizarDialog(true)}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
                 <CheckCircle2 className="h-4 w-4 mr-2" />
                 Finalizar Reunión
               </Button>
@@ -116,20 +152,20 @@ export function ReunionActiva() {
         <CardContent>
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">
-                Tema {temaActual + 1} de {temasReunion.length}
+              <span className="text-slate-600">
+                Tema {temaActual + 1} de {temas.length}
               </span>
-              <span className="font-medium">{Math.round(progreso)}% completado</span>
+              <span className="font-medium text-slate-900">{Math.round(progreso)}% completado</span>
             </div>
             <Progress value={progreso} className="h-2" />
 
             <div className="flex items-center gap-2 pt-2">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground mr-2">Asistentes:</span>
+              <Users className="h-4 w-4 text-slate-500" />
+              <span className="text-sm text-slate-600 mr-2">Asistentes:</span>
               <div className="flex -space-x-2">
                 {["JD", "MS", "AL", "RP"].map((iniciales, idx) => (
-                  <Avatar key={idx} className="h-6 w-6 border-2 border-background">
-                    <AvatarFallback className="text-xs">{iniciales}</AvatarFallback>
+                  <Avatar key={idx} className="h-6 w-6 border-2 border-white shadow-sm">
+                    <AvatarFallback className="text-xs bg-blue-50 text-blue-700">{iniciales}</AvatarFallback>
                   </Avatar>
                 ))}
               </div>
@@ -138,7 +174,6 @@ export function ReunionActiva() {
         </CardContent>
       </Card>
 
-      {/* Tema actual */}
       <Card>
         <CardHeader>
           <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -161,8 +196,8 @@ export function ReunionActiva() {
                 Anterior
               </Button>
               <Button
-                disabled={temaActual === temasReunion.length - 1}
-                onClick={() => setTemaActual(Math.min(temasReunion.length - 1, temaActual + 1))}
+                disabled={temaActual === temas.length - 1}
+                onClick={() => setTemaActual(Math.min(temas.length - 1, temaActual + 1))}
               >
                 Siguiente
                 <ArrowRight className="h-4 w-4 ml-2" />
@@ -206,28 +241,52 @@ export function ReunionActiva() {
       </Card>
 
       {showNuevoTemaDialog && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <Card className="max-w-lg w-full">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <Card className="max-w-lg w-full border-slate-200 shadow-lg">
             <CardHeader>
-              <CardTitle>Añadir Nuevo Tema</CardTitle>
-              <CardDescription>Este tema se agregará a la lista general y a esta reunión</CardDescription>
+              <CardTitle className="text-slate-900">Añadir Nuevo Tema</CardTitle>
+              <CardDescription className="text-slate-600">
+                Este tema se agregará a la lista general y a esta reunión
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="nombre-tema">Nombre del tema</Label>
-                <Input id="nombre-tema" placeholder="Ej: Revisión de presupuesto anual" />
+                <Label htmlFor="nombre-tema" className="text-slate-700">
+                  Nombre del tema
+                </Label>
+                <Input
+                  id="nombre-tema"
+                  placeholder="Ej: Revisión de presupuesto anual"
+                  value={nuevoTema.nombre}
+                  onChange={(e) => setNuevoTema({ ...nuevoTema, nombre: e.target.value })}
+                  className="border-slate-200"
+                />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="descripcion-tema">Descripción</Label>
-                <Textarea id="descripcion-tema" placeholder="Describe brevemente el tema..." rows={3} />
+                <Label htmlFor="descripcion-tema" className="text-slate-700">
+                  Descripción
+                </Label>
+                <Textarea
+                  id="descripcion-tema"
+                  placeholder="Describe brevemente el tema..."
+                  rows={3}
+                  value={nuevoTema.descripcion}
+                  onChange={(e) => setNuevoTema({ ...nuevoTema, descripcion: e.target.value })}
+                  className="border-slate-200"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="importancia">Importancia</Label>
-                  <Select defaultValue="media">
-                    <SelectTrigger id="importancia">
+                  <Label htmlFor="importancia" className="text-slate-700">
+                    Importancia
+                  </Label>
+                  <Select
+                    value={nuevoTema.importancia}
+                    onValueChange={(value) => setNuevoTema({ ...nuevoTema, importancia: value })}
+                  >
+                    <SelectTrigger id="importancia" className="border-slate-200">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -239,9 +298,14 @@ export function ReunionActiva() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="responsable">Responsable</Label>
-                  <Select defaultValue="jd">
-                    <SelectTrigger id="responsable">
+                  <Label htmlFor="responsable" className="text-slate-700">
+                    Responsable
+                  </Label>
+                  <Select
+                    value={nuevoTema.responsable}
+                    onValueChange={(value) => setNuevoTema({ ...nuevoTema, responsable: value })}
+                  >
+                    <SelectTrigger id="responsable" className="border-slate-200">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -257,12 +321,19 @@ export function ReunionActiva() {
               <div className="flex gap-3 pt-2">
                 <Button
                   variant="outline"
-                  className="flex-1 bg-transparent"
-                  onClick={() => setShowNuevoTemaDialog(false)}
+                  className="flex-1 bg-transparent border-slate-200"
+                  onClick={() => {
+                    setShowNuevoTemaDialog(false)
+                    setNuevoTema({ nombre: "", descripcion: "", importancia: "media", responsable: "jd" })
+                  }}
                 >
                   Cancelar
                 </Button>
-                <Button className="flex-1" onClick={() => setShowNuevoTemaDialog(false)}>
+                <Button
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  onClick={handleAddTema}
+                  disabled={!nuevoTema.nombre}
+                >
                   Añadir Tema
                 </Button>
               </div>
@@ -369,11 +440,11 @@ export function ReunionActiva() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between text-sm p-3 bg-muted/50 rounded-lg">
                   <span className="text-muted-foreground">Temas tratados</span>
-                  <span className="font-semibold">{temasReunion.length}</span>
+                  <span className="font-semibold">{temas.length}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm p-3 bg-muted/50 rounded-lg">
-                  <span className="text-muted-foreground">Duración</span>
-                  <span className="font-semibold">45 minutos</span>
+                  <span className="text-muted-foreground">Asistentes</span>
+                  <span className="font-semibold">4</span>
                 </div>
                 <div className="flex items-center justify-between text-sm p-3 bg-muted/50 rounded-lg">
                   <span className="text-muted-foreground">Nuevas decisiones</span>

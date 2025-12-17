@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
-import { CheckCircle2, Calendar, Clock, Users, FileText, ArrowRight, Download } from "lucide-react"
+import { CheckCircle2, Calendar, Clock, Users, FileText, ArrowRight, Download, Mail } from "lucide-react"
 import Link from "next/link"
+import { useState } from "react"
 
 const resumenData = {
   fecha: new Date().toLocaleDateString("es-ES", { weekday: "long", year: "numeric", month: "long", day: "numeric" }),
@@ -20,6 +21,15 @@ const resumenData = {
       importancia: "alta",
       nuevasDecisiones: 2,
       nuevasAcciones: 3,
+      decisiones: [
+        "Se ha decidido usar Salesforce como plataforma principal",
+        "Presupuesto aprobado: $50,000 para implementación inicial",
+      ],
+      acciones: [
+        "Revisar propuestas de proveedores - MS",
+        "Preparar documento de requisitos técnicos - JD",
+        "Coordinar reunión con equipo de IT - AL",
+      ],
     },
     {
       id: "2",
@@ -28,6 +38,8 @@ const resumenData = {
       importancia: "media",
       nuevasDecisiones: 1,
       nuevasAcciones: 2,
+      decisiones: ["Se priorizan los objetivos de crecimiento en nuevos mercados"],
+      acciones: ["Definir objetivos del trimestre - RP", "Preparar presentación para dirección - JD"],
     },
   ],
   proximaReunion: {
@@ -43,6 +55,55 @@ const resumenData = {
 }
 
 export function ResumenReunion() {
+  const [showDownloadDialog, setShowDownloadDialog] = useState(false)
+
+  const generarActaEmail = () => {
+    let acta = `ACTA DE REUNIÓN SEMANAL\n`
+    acta += `Fecha: ${resumenData.fecha}\n`
+    acta += `Duración: ${resumenData.duracion}\n\n`
+
+    acta += `ASISTENTES:\n`
+    const nombresAsistentes = ["Juan Pérez", "María Sánchez", "Ana López", "Roberto Pérez"]
+    nombresAsistentes.forEach((nombre) => {
+      acta += `• ${nombre}\n`
+    })
+
+    acta += `\n═══════════════════════════════════════\n\n`
+
+    resumenData.temasTratados.forEach((tema, idx) => {
+      acta += `TEMA ${idx + 1}: ${tema.nombre.toUpperCase()}\n`
+      acta += `Estado: ${tema.estado} | Importancia: ${tema.importancia}\n\n`
+
+      acta += `Decisiones tomadas:\n`
+      tema.decisiones.forEach((decision) => {
+        acta += `  ✓ ${decision}\n`
+      })
+
+      acta += `\nPróximas acciones:\n`
+      tema.acciones.forEach((accion) => {
+        acta += `  → ${accion}\n`
+      })
+
+      acta += `\n───────────────────────────────────────\n\n`
+    })
+
+    acta += `RESUMEN:\n`
+    acta += `• ${resumenData.estadisticas.totalDecisiones} decisiones tomadas\n`
+    acta += `• ${resumenData.estadisticas.totalAcciones} acciones asignadas\n`
+    acta += `• ${resumenData.estadisticas.temasAbiertos} temas continúan abiertos\n\n`
+
+    acta += `PRÓXIMA REUNIÓN: ${resumenData.proximaReunion.fecha}\n`
+    acta += `Temas agendados: ${resumenData.proximaReunion.temasAgendados}\n`
+
+    return acta
+  }
+
+  const copiarAlPortapapeles = () => {
+    const acta = generarActaEmail()
+    navigator.clipboard.writeText(acta)
+    setShowDownloadDialog(true)
+  }
+
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       {/* Header de éxito */}
@@ -218,7 +279,7 @@ export function ResumenReunion() {
 
       {/* Acciones */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <Button variant="outline" className="flex-1 bg-transparent">
+        <Button variant="outline" className="flex-1 bg-transparent" onClick={copiarAlPortapapeles}>
           <Download className="h-4 w-4 mr-2" />
           Descargar Acta
         </Button>
@@ -235,6 +296,57 @@ export function ResumenReunion() {
           </Button>
         </Link>
       </div>
+
+      {showDownloadDialog && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <Card className="max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <CardHeader>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="h-12 w-12 rounded-full bg-green-500/20 flex items-center justify-center">
+                  <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <CardTitle>Acta Copiada al Portapapeles</CardTitle>
+                  <CardDescription>Lista para enviar por correo electrónico</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="p-4 bg-muted rounded-lg">
+                <div className="flex items-start gap-3 mb-3">
+                  <Mail className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold mb-1">Cómo enviar el acta por email</p>
+                    <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+                      <li>Abre tu cliente de correo electrónico</li>
+                      <li>Crea un nuevo mensaje</li>
+                      <li>Pega el contenido (Ctrl+V o Cmd+V)</li>
+                      <li>Añade los destinatarios y envía</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border rounded-lg p-4 bg-background">
+                <p className="text-xs text-muted-foreground mb-2 font-semibold">Vista previa del acta:</p>
+                <pre className="text-xs whitespace-pre-wrap font-mono leading-relaxed max-h-[300px] overflow-y-auto">
+                  {generarActaEmail()}
+                </pre>
+              </div>
+
+              <div className="flex gap-3">
+                <Button variant="outline" className="flex-1 bg-transparent" onClick={copiarAlPortapapeles}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Copiar de Nuevo
+                </Button>
+                <Button className="flex-1" onClick={() => setShowDownloadDialog(false)}>
+                  Cerrar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }

@@ -7,7 +7,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { FileText, MessageSquare, Plus } from "lucide-react"
-import { useSearchParams } from "next/navigation"
 
 interface Decision {
   id: string
@@ -19,17 +18,15 @@ interface Decision {
 interface TemaDecisionesProps {
   decisiones: Decision[]
   temaId: string
+  fromReunion?: boolean
 }
 
-export function TemaDecisiones({ decisiones: decisionesIniciales, temaId }: TemaDecisionesProps) {
+export function TemaDecisiones({ decisiones: decisionesIniciales, temaId, fromReunion = false }: TemaDecisionesProps) {
   const [decisiones, setDecisiones] = useState<Decision[]>(decisionesIniciales)
   const [isAdding, setIsAdding] = useState(false)
   const [nuevaDecision, setNuevaDecision] = useState("")
   const [notasDecision, setNotasDecision] = useState<Record<string, string>>({})
   const [editandoNota, setEditandoNota] = useState<string | null>(null)
-
-  const searchParams = useSearchParams()
-  const fromReunion = searchParams.get("from") === "reunion"
 
   const handleAdd = () => {
     if (nuevaDecision.trim()) {
@@ -37,7 +34,7 @@ export function TemaDecisiones({ decisiones: decisionesIniciales, temaId }: Tema
         id: Date.now().toString(),
         texto: nuevaDecision,
         fecha: new Date().toISOString(),
-        autor: "CG",
+        autor: "JD",
       }
 
       setDecisiones([nuevaDecisionObj, ...decisiones])
@@ -48,7 +45,6 @@ export function TemaDecisiones({ decisiones: decisionesIniciales, temaId }: Tema
 
   const handleAddNota = (decisionId: string) => {
     if (notasDecision[decisionId]?.trim()) {
-      // In real app, this would update the backend
       setEditandoNota(null)
     }
   }

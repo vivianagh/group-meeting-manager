@@ -105,7 +105,6 @@ export function ReunionActiva() {
                 <Plus className="h-4 w-4 mr-2" />
                 Añadir Tema
               </Button>
-              {/* </CHANGE> */}
 
               <Button variant="default" size="sm" onClick={() => setShowFinalizarDialog(true)}>
                 <CheckCircle2 className="h-4 w-4 mr-2" />
@@ -148,7 +147,6 @@ export function ReunionActiva() {
                 <Badge>Tema {temaActual + 1}</Badge>
                 <Badge variant={tema.importancia === "alta" ? "destructive" : "default"}>{tema.importancia}</Badge>
                 <Badge variant="outline">{tema.estado}</Badge>
-                {/* </CHANGE> */}
               </div>
               <CardTitle className="text-xl">{tema.nombre}</CardTitle>
             </div>
@@ -188,7 +186,6 @@ export function ReunionActiva() {
               </Select>
             </div>
           </CardDescription>
-          {/* </CHANGE> */}
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="acciones" className="w-full">
@@ -198,11 +195,11 @@ export function ReunionActiva() {
             </TabsList>
 
             <TabsContent value="acciones" className="mt-6">
-              <TemaAcciones acciones={tema.acciones} temaId={tema.id} />
+              <TemaAcciones acciones={tema.acciones} temaId={tema.id} fromReunion={true} />
             </TabsContent>
 
             <TabsContent value="decisiones" className="mt-6">
-              <TemaDecisiones decisiones={tema.decisiones} temaId={tema.id} />
+              <TemaDecisiones decisiones={tema.decisiones} temaId={tema.id} fromReunion={true} />
             </TabsContent>
           </Tabs>
         </CardContent>
@@ -273,7 +270,6 @@ export function ReunionActiva() {
           </Card>
         </div>
       )}
-      {/* </CHANGE> */}
 
       {showHistoricoDialog && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -361,9 +357,7 @@ export function ReunionActiva() {
           </Card>
         </div>
       )}
-      {/* </CHANGE> */}
 
-      {/* Dialog de finalizar */}
       {showFinalizarDialog && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <Card className="max-w-md w-full">
@@ -396,7 +390,6 @@ export function ReunionActiva() {
                   </span>
                   <span className="font-semibold text-amber-700 dark:text-amber-400">2</span>
                 </div>
-                {/* </CHANGE> */}
               </div>
 
               <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
@@ -412,7 +405,6 @@ export function ReunionActiva() {
                   </div>
                 </div>
               </div>
-              {/* </CHANGE> */}
 
               <div className="flex gap-3">
                 <Button

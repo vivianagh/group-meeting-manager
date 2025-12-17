@@ -10,10 +10,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Bell, Calendar, LogOut, Settings, Users } from "lucide-react"
+import { Bell, Calendar, LogOut, Settings, Users, PlayCircle } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export function DashboardHeader() {
+  const router = useRouter()
+
   return (
     <header className="border-b bg-card">
       <div className="container mx-auto px-4 py-4 max-w-7xl">
@@ -53,9 +56,10 @@ export function DashboardHeader() {
               </span>
             </Button>
 
-            <Link href="/dashboard/reuniones">
-              <Button>Iniciar Reunión</Button>
-            </Link>
+            <Button onClick={() => router.push("/dashboard/reuniones/activa")}>
+              <PlayCircle className="h-4 w-4 mr-2" />
+              Iniciar Reunión
+            </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

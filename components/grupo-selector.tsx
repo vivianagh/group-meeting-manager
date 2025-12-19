@@ -14,9 +14,9 @@ import {
 
 // Mock data - en producción vendría de la base de datos
 const gruposUsuario = [
-  { id: "1", nombre: "Equipo de Producto", rol: "Miembro" },
+  { id: "1", nombre: "Equipo de Dirección", rol: "Miembro" },
   { id: "2", nombre: "Equipo de IT", rol: "Líder" },
-  { id: "3", nombre: "Equipo Comercial", rol: "Miembro" },
+  { id: "3", nombre: "Equipo de Business", rol: "Miembro" },
 ]
 
 export function GrupoSelector() {

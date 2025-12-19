@@ -134,7 +134,7 @@ export function ReunionActiva() {
                 className="border-slate-200"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Añadir Tema
+                Añadir Nuevo Tema
               </Button>
 
               <Button
@@ -334,7 +334,7 @@ export function ReunionActiva() {
                   onClick={handleAddTema}
                   disabled={!nuevoTema.nombre}
                 >
-                  Añadir Tema
+                  Añadir Nuevo Tema
                 </Button>
               </div>
             </CardContent>

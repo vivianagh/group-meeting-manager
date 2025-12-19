@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Users, PlayCircle, GripVertical, Clock } from "lucide-react"
+import { Calendar, Users, PlayCircle, GripVertical, Clock, X, AlertTriangle } from "lucide-react"
 import Link from "next/link"
 
 const asistentesDefault = [
@@ -35,7 +35,6 @@ const temasOrdenDiaInicial = [
 
 const ultimaReunion = {
   fecha: "2024-01-15",
-  duracion: "1h 15min",
   temasTratados: 4,
   decisiones: 5,
   acciones: 8,
@@ -45,6 +44,7 @@ export function IniciarReunion() {
   const [asistentes, setAsistentes] = useState(asistentesDefault)
   const [temas, setTemas] = useState(temasOrdenDiaInicial)
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+  const [temaToDelete, setTemaToDelete] = useState<string | null>(null)
 
   const toggleAsistente = (id: string) => {
     setAsistentes(asistentes.map((a) => (a.id === id ? { ...a, presente: !a.presente } : a)))
@@ -75,6 +75,12 @@ export function IniciarReunion() {
     )
   }
 
+  const handleRemoveTema = (temaId: string) => {
+    setTemas(temas.filter((t) => t.id !== temaId))
+    setTemaToDelete(null)
+    console.log("[v0] Removed tema from meeting:", temaId)
+  }
+
   return (
     <div className="space-y-6">
       <Card className="border-primary/20 bg-primary/5">
@@ -83,14 +89,10 @@ export function IniciarReunion() {
           <CardDescription>Consulta información de la reunión anterior</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div>
               <p className="text-xs text-muted-foreground mb-1">Fecha</p>
               <p className="text-sm font-semibold">{new Date(ultimaReunion.fecha).toLocaleDateString("es-ES")}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground mb-1">Duración</p>
-              <p className="text-sm font-semibold">{ultimaReunion.duracion}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground mb-1">Temas</p>
@@ -171,7 +173,7 @@ export function IniciarReunion() {
             </div>
 
             <p className="text-sm text-muted-foreground mb-3">
-              Temas marcados como "Siguiente reunión". Arrastra para reordenar.
+              Temas marcados como "Siguiente reunión". Arrastra para reordenar o elimina los que no se tratarán.
             </p>
 
             <div className="space-y-3">
@@ -182,7 +184,7 @@ export function IniciarReunion() {
                   onDragStart={() => handleDragStart(index)}
                   onDragOver={(e) => handleDragOver(e, index)}
                   onDragEnd={handleDragEnd}
-                  className={`flex items-center gap-3 p-4 border rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-move ${
+                  className={`flex items-center gap-3 p-4 border rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors ${
                     draggedIndex === index ? "opacity-50" : ""
                   }`}
                 >
@@ -197,6 +199,17 @@ export function IniciarReunion() {
                   <Badge variant={tema.importancia === "alta" ? "destructive" : "default"} className="flex-shrink-0">
                     {tema.importancia}
                   </Badge>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 flex-shrink-0"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setTemaToDelete(tema.id)
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 </div>
               ))}
             </div>
@@ -215,6 +228,39 @@ export function IniciarReunion() {
           </Link>
         </CardContent>
       </Card>
+
+      {/* Delete confirmation dialog */}
+      {temaToDelete && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <Card className="max-w-md w-full">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-amber-500/20 flex items-center justify-center">
+                  <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div>
+                  <CardTitle>Eliminar tema de la reunión</CardTitle>
+                  <CardDescription>Esta acción no eliminará el tema permanentemente</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm">
+                ¿Eliminar este tema de la próxima reunión? El tema se conservará para futuras reuniones y podrá ser
+                agregado nuevamente cuando sea necesario.
+              </p>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => setTemaToDelete(null)} className="flex-1">
+                  Cancelar
+                </Button>
+                <Button variant="destructive" onClick={() => handleRemoveTema(temaToDelete)} className="flex-1">
+                  Eliminar de la reunión
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }

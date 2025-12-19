@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
-import { CheckCircle2, Calendar, Clock, Users, FileText, ArrowRight, Download, Mail } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { CheckCircle2, Calendar, Users, FileText, ArrowRight, Download, Mail } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 
 const resumenData = {
   fecha: new Date().toLocaleDateString("es-ES", { weekday: "long", year: "numeric", month: "long", day: "numeric" }),
-  duracion: "45 minutos",
   asistentes: ["JD", "MS", "AL", "RP"],
   temasTratados: [
     {
@@ -56,11 +57,17 @@ const resumenData = {
 
 export function ResumenReunion() {
   const [showDownloadDialog, setShowDownloadDialog] = useState(false)
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  const getDefaultDate = () => {
+    const date = new Date()
+    date.setDate(date.getDate() + 7)
+    return date.toISOString().split("T")[0]
+  }
+  const [selectedDate, setSelectedDate] = useState(getDefaultDate())
 
   const generarActaEmail = () => {
     let acta = `ACTA DE REUNIÓN SEMANAL\n`
-    acta += `Fecha: ${resumenData.fecha}\n`
-    acta += `Duración: ${resumenData.duracion}\n\n`
+    acta += `Fecha: ${resumenData.fecha}\n\n`
 
     acta += `ASISTENTES:\n`
     const nombresAsistentes = ["Juan Pérez", "María Sánchez", "Ana López", "Roberto Pérez"]
@@ -92,7 +99,7 @@ export function ResumenReunion() {
     acta += `• ${resumenData.estadisticas.totalAcciones} acciones asignadas\n`
     acta += `• ${resumenData.estadisticas.temasAbiertos} temas continúan abiertos\n\n`
 
-    acta += `PRÓXIMA REUNIÓN: ${resumenData.proximaReunion.fecha}\n`
+    acta += `PRÓXIMA REUNIÓN: ${selectedDate}\n`
     acta += `Temas agendados: ${resumenData.proximaReunion.temasAgendados}\n`
 
     return acta
@@ -102,6 +109,11 @@ export function ResumenReunion() {
     const acta = generarActaEmail()
     navigator.clipboard.writeText(acta)
     setShowDownloadDialog(true)
+  }
+
+  const handleFinalizar = () => {
+    console.log("[v0] Meeting finalized with next meeting date:", selectedDate)
+    setShowDatePicker(false)
   }
 
   return (
@@ -127,20 +139,12 @@ export function ResumenReunion() {
           <CardTitle>Resumen General</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
               <Calendar className="h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="text-xs text-muted-foreground">Fecha</p>
                 <p className="text-sm font-semibold">{resumenData.fecha}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-              <Clock className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">Duración</p>
-                <p className="text-sm font-semibold">{resumenData.duracion}</p>
               </div>
             </div>
 
@@ -247,17 +251,23 @@ export function ResumenReunion() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Próxima Reunión Creada
+                Próxima Reunión
               </CardTitle>
-              <CardDescription className="mt-2">La siguiente reunión ha sido generada automáticamente</CardDescription>
+              <CardDescription className="mt-2">Configura la fecha de la siguiente reunión</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="p-3 bg-background rounded-lg">
-              <p className="text-xs text-muted-foreground mb-1">Fecha programada</p>
-              <p className="font-semibold">{resumenData.proximaReunion.fecha}</p>
+              <p className="text-xs text-muted-foreground mb-1">Fecha sugerida (7 días)</p>
+              <p className="font-semibold">
+                {new Date(getDefaultDate()).toLocaleDateString("es-ES", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </p>
             </div>
             <div className="p-3 bg-background rounded-lg">
               <p className="text-xs text-muted-foreground mb-1">Temas en orden del día</p>
@@ -268,12 +278,18 @@ export function ResumenReunion() {
           <div className="p-4 bg-background border border-primary/20 rounded-lg">
             <div className="flex items-start gap-3">
               <FileText className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-              <p className="text-sm leading-relaxed">
-                Los <strong>{resumenData.estadisticas.temasAbiertos} temas</strong> que continúan en estado abierto han
-                sido agregados automáticamente al orden del día de la próxima reunión.
-              </p>
+              <div>
+                <p className="text-sm leading-relaxed">
+                  Los <strong>{resumenData.estadisticas.temasAbiertos} temas</strong> que continúan en estado abierto
+                  han sido agregados automáticamente al orden del día de la próxima reunión.
+                </p>
+              </div>
             </div>
           </div>
+
+          <Button onClick={() => setShowDatePicker(true)} className="w-full">
+            Confirmar y Finalizar
+          </Button>
         </CardContent>
       </Card>
 
@@ -342,6 +358,63 @@ export function ResumenReunion() {
                 <Button className="flex-1" onClick={() => setShowDownloadDialog(false)}>
                   Cerrar
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {showDatePicker && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <Card className="max-w-md w-full">
+            <CardHeader>
+              <CardTitle>Confirmar Próxima Reunión</CardTitle>
+              <CardDescription>
+                Selecciona la fecha para la siguiente reunión (sugerida: 7 días después)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="fecha-proxima">Fecha de la próxima reunión</Label>
+                <Input
+                  id="fecha-proxima"
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="w-full"
+                  min={new Date().toISOString().split("T")[0]}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Fecha sugerida:{" "}
+                  {new Date(getDefaultDate()).toLocaleDateString("es-ES", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </p>
+              </div>
+
+              <div className="p-3 bg-muted rounded-lg">
+                <p className="text-sm">
+                  <strong>{resumenData.estadisticas.temasAbiertos} temas</strong> se agregarán al orden del día de la
+                  reunión del{" "}
+                  {new Date(selectedDate).toLocaleDateString("es-ES", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => setShowDatePicker(false)} className="flex-1">
+                  Cancelar
+                </Button>
+                <Link href="/dashboard" className="flex-1">
+                  <Button onClick={handleFinalizar} className="w-full">
+                    Confirmar y Finalizar
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>

@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 const gruposUsuario = [
   {
     id: "1",
-    nombre: "Equipo de Producto",
+    nombre: "Equipo de Dirección",
     descripcion: "Desarrollo y estrategia de producto",
     miembros: 8,
     temasActivos: 5,
@@ -28,7 +28,7 @@ const gruposUsuario = [
   },
   {
     id: "3",
-    nombre: "Equipo Comercial",
+    nombre: "Equipo de Business",
     descripcion: "Ventas y desarrollo de negocio",
     miembros: 12,
     temasActivos: 7,
